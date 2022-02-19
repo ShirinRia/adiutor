@@ -1,26 +1,21 @@
-import sys,datetime,wikipedia,smtplib,cv2,random,pyttsx3
-# from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog, QGridLayout, \
-#     QMainWindow, QHBoxLayout, QAction, QPlainTextEdit, QMenuBar, QTabWidget, QListWidgetItem, QListWidget
+import sys,mysql.connector,datetime,wikipedia,smtplib,cv2,random,pyttsx3,webbrowser,socket
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
-from PyQt5.QtCore import Qt
-from PIL import Image
 import speech_recognition as sr #pip install speechRecognition
-from requests import get
-import webbrowser
 
-widgets = {
-    "logo": [],
-    "button": [],
-    "items": [],
-    "question": [],
-    "answer1": [],
-    "answer2": [],
-    "answer3": [],
-    "answer4": []
-}
+
+hostname = socket.gethostname()
+IPAddr = socket.gethostbyname(hostname)
+
+db=mysql.connector.connect(
+    host=" sql6.freemysqlhosting.net",
+    user="sql6473246",
+    password="vrYZb6cDv9",
+    database="sql6473246"
+)
+
 
 app=QApplication(sys.argv)
 window=QWidget()
@@ -30,7 +25,6 @@ window.setFixedHeight(600)
 window.move(440,80)#(x,y)
 window.setStyleSheet("background:'White'")
 grid=QGridLayout()
-frm=QFormLayout()
 
 def wishMe():
     hour = int(datetime.datetime.now().hour)
@@ -95,7 +89,6 @@ class Window(QWidget):
         label4 = QLabel("Widget in Tab 4.")
         label1.setStyleSheet("color:'Green';")
         list_widget = QListWidget()
-        list_widget2 = QListWidget()
         i=1
         item1 = QListWidgetItem("Hello dear, Welcome to Adiutor.")
         item2 = QListWidgetItem("Read the following instructions to run adiutor as you want:")
@@ -121,9 +114,19 @@ class Window(QWidget):
         list_widget.setWordWrap(True)
 
         list_widget.setStyleSheet("color:'Green'; font-size: 16px; ")
-        #
-        # text = QListWidgetItem(QInputDialog.getText(self, 'Input Dialog', 'Enter text:'))
-        # list_widget2.addItem(text)
+
+
+        groupbox = QGroupBox("Customize Your Adiutor")
+
+        vbox = QVBoxLayout()
+        groupbox.setLayout(vbox)
+        labelcmnd=QLabel("Command")
+        labelpath=QLabel("Path/URL")
+        cmnd = QLineEdit(self)
+        path=QLineEdit(self)
+        cmnd.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 20px; padding: 5px 0 5px;"  )
+        labelpath.setStyleSheet("margin:0 0 0; ")
+        path.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 100px; padding: 5px 0 5px;")
         btn = QPushButton('Add Command')
         btn.setStyleSheet(
             "*{width: 100px;" +
@@ -136,19 +139,9 @@ class Window(QWidget):
             "padding: 8px 15px}" +
             "*:hover{background:'#BC006C';color:'White';}"
         )
-        btn.clicked.connect(self.showDialog)
-        groupbox = QGroupBox("Customize Your Adiutor")
+        btn.clicked.connect(lambda: button_click(cmnd.text(),path.text()))
 
-        vbox = QVBoxLayout()
-        groupbox.setLayout(vbox)
-        labelcmnd=QLabel("Command")
-        labelpath=QLabel("Path/URL")
-        cmnd = QLineEdit(self)
-        cmnd.move(800, 20)
-        path=QLineEdit(self)
-        cmnd.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 20px; padding: 5px 0 5px;"  )
-        labelpath.setStyleSheet("margin:0 0 0; ")
-        path.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 100px; padding: 5px 0 5px;")
+
         vbox.addWidget(labelcmnd)
         vbox.addWidget(cmnd)
         vbox.addWidget(labelpath)
@@ -160,19 +153,25 @@ class Window(QWidget):
         tabwidget.addTab(groupbox, "Settings")
         tabwidget.addTab(label4, "List")
         grid.addWidget(tabwidget, 0, 0)
-    def showDialog(self):
-        text=QLineEdit(self)
+
+def button_click(a,b):
+    cmndtxt = a
+    pathtxt=b
+    print(cmndtxt)
+    print (pathtxt)
+    if db.is_connected():
+        print("connected")
+        cur = db.cursor()
+        sql = "UPDATE Command SET command = %s, path=%s WHERE ip = %s"
+        val = (cmndtxt, pathtxt,IPAddr)
+
+        cur.execute(sql,val)
+        db.commit()
 
 
 # logo widget
 image = QPixmap("microphone.png")
-# image = image.scaledToWidth(100)
-# image = image.scaledToHeight(100)
 button = QPushButton()
-# logo = QLabel()
-# logo.setPixmap(image)
-# logo.setAlignment(QtCore.Qt.AlignCenter)
-# logo.setStyleSheet(" margin-bottom: 30px;")
 button.setIcon(QIcon(image))
 button.setIconSize(QtCore.QSize(100,100))
 button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
@@ -194,5 +193,5 @@ def scndintrfc():
     screen = Window()
     window.setLayout(grid)
     window.show()
-#     sys.exit(app.exec())
-# scndintrfc()
+
+scndintrfc()
