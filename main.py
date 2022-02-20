@@ -3,8 +3,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
+from PyQt5.QtCore import Qt
+from PIL import Image
 import speech_recognition as sr #pip install speechRecognition
-
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
@@ -16,7 +17,6 @@ db=mysql.connector.connect(
     database="sql6473246"
 )
 
-
 app=QApplication(sys.argv)
 window=QWidget()
 window.setWindowTitle("Adiutor")
@@ -26,68 +26,20 @@ window.move(440,80)#(x,y)
 window.setStyleSheet("background:'White'")
 grid=QGridLayout()
 
-def wishMe():
-    hour = int(datetime.datetime.now().hour)
-    if hour>=0 and hour<12:
-        speak("Good Morning!")
 
-    elif hour>=12 and hour<18:
-        speak("Good Afternoon!")
-
-    else:
-        speak("Good Evening!")
-
-    speak("I am Adiutor, your virtual assistant. how may I help you?")
-
-def speak(audio):
-    engine = pyttsx3.init('sapi5')
-    voices = engine.getProperty('voices')
-    # print(voices[1].id)
-    engine.setProperty('voice', voices[0].id)
-    engine.say(audio)
-    engine.runAndWait()
-
-def takeCommand():
-    #It takes microphone input from the user and returns string output
-
-    r = sr.Recognizer()
-    with sr.Microphone() as source: #microphone k source hishebe use korbe,
-        print("Listening...")
-        r.pause_threshold = 1 #(amar kothar kono part jeno shuna bad na jay
-        audio = r.listen(source)
-
-    try:
-        print("Recognizing...")
-        query = r.recognize_google(audio, language='en-in')
-        print(f"User said: {query}\n")
-
-    except Exception as e:
-        # print(e)
-        print("Say that again please...")
-        return "None"
-    return query
-def start_game():
+def start():
     '''display frame 2'''
-
-    wishMe()
-    while True:
-        query = takeCommand().lower()
-        if 'open youtube' in query:
-
-            webbrowser.open("https://www.youtube.com/")
-        elif 'set alarm' in query:
-                import alarm2
-                alarm2.bacao()
-
+    import voice
+    voice.start_game()
 
 class Window(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.setLayout(grid)
         label1 = QLabel("Widget in Tab 1.")
-        label3 = QLabel("Widget in Tab 3.")
-        label4 = QLabel("Widget in Tab 4.")
         label1.setStyleSheet("color:'Green';")
+
+        #help
         list_widget = QListWidget()
         i=1
         item1 = QListWidgetItem("Hello dear, Welcome to Adiutor.")
@@ -100,7 +52,6 @@ class Window(QWidget):
         item8 = QListWidgetItem("   " +str(i+4) + " " +" search .. on google (for searching anything on google)")
         item9 = QListWidgetItem("   " +str(i+5) + " " +" play ... on youtube (for playing music on youtube)")
 
-
         list_widget.addItem(item1)
         list_widget.addItem(item2)
         list_widget.addItem(item3)
@@ -112,12 +63,10 @@ class Window(QWidget):
         list_widget.addItem(item9)
 
         list_widget.setWordWrap(True)
-
         list_widget.setStyleSheet("color:'Green'; font-size: 16px; ")
 
-
+        #settings
         groupbox = QGroupBox("Customize Your Adiutor")
-
         vbox = QVBoxLayout()
         groupbox.setLayout(vbox)
         labelcmnd=QLabel("Command")
@@ -127,6 +76,7 @@ class Window(QWidget):
         cmnd.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 20px; padding: 5px 0 5px;"  )
         labelpath.setStyleSheet("margin:0 0 0; ")
         path.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 100px; padding: 5px 0 5px;")
+        print(cmnd.text())
         btn = QPushButton('Add Command')
         btn.setStyleSheet(
             "*{width: 100px;" +
@@ -140,20 +90,35 @@ class Window(QWidget):
             "*:hover{background:'#BC006C';color:'White';}"
         )
         btn.clicked.connect(lambda: button_click(cmnd.text(),path.text()))
-
-
         vbox.addWidget(labelcmnd)
         vbox.addWidget(cmnd)
         vbox.addWidget(labelpath)
         vbox.addWidget(path)
         vbox.addWidget(btn)
+
+        #table
+        self.createTable()
+        self.layout = QVBoxLayout()
+        self.layout.addWidget(self.tableWidget)
+        self.setLayout(self.layout)
+
         tabwidget = QTabWidget()
         tabwidget.addTab(label1, "Home")
         tabwidget.addTab(list_widget, "Help")
         tabwidget.addTab(groupbox, "Settings")
-        tabwidget.addTab(label4, "List")
+        tabwidget.addTab(self.tableWidget, "List")
         grid.addWidget(tabwidget, 0, 0)
 
+    def createTable(self):
+        self.tableWidget = QTableWidget()
+        # Row count
+        self.tableWidget.setRowCount(4)
+        # Column count
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setItem(0, 0, QTableWidgetItem("Command"))
+        self.tableWidget.setItem(0, 1, QTableWidgetItem("Path/URL"))
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 def button_click(a,b):
     cmndtxt = a
     pathtxt=b
@@ -164,10 +129,8 @@ def button_click(a,b):
         cur = db.cursor()
         sql = "UPDATE Command SET command = %s, path=%s WHERE ip = %s"
         val = (cmndtxt, pathtxt,IPAddr)
-
         cur.execute(sql,val)
         db.commit()
-
 
 # logo widget
 image = QPixmap("microphone.png")
@@ -185,7 +148,7 @@ button.setStyleSheet(
     "margin:0px 170px 45px;}" +
     "*:hover{background:'#BC006C';}"
 )
-button.clicked.connect(start_game)
+button.clicked.connect(start)
 grid.addWidget(button, 4, 0, 1, 2)
 
 def scndintrfc():
