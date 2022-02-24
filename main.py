@@ -1,15 +1,14 @@
+import hashlib
 import sys,mysql.connector,datetime,wikipedia,smtplib,cv2,random,pyttsx3,webbrowser,socket
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
-from PyQt5.QtCore import Qt
-from PIL import Image
-import speech_recognition as sr #pip install speechRecognition
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
-
+hash = hashlib.md5(IPAddr.encode())
+haship=hash.hexdigest()
 db=mysql.connector.connect(
     host=" sql6.freemysqlhosting.net",
     user="sql6473246",
@@ -28,19 +27,19 @@ grid=QGridLayout()
 
 
 def start():
-    '''display frame 2'''
-    import voice
-    voice.start_game()
+    import functions
+    functions.begindfg()
 
 class Window(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.setLayout(grid)
         label1 = QLabel("Widget in Tab 1.")
+        label3 = QLabel("Widget in Tab 3.")
+        label4 = QLabel("Widget in Tab 4.")
         label1.setStyleSheet("color:'Green';")
-
-        #help
         list_widget = QListWidget()
+        list_widget2 = QListWidget()
         i=1
         item1 = QListWidgetItem("Hello dear, Welcome to Adiutor.")
         item2 = QListWidgetItem("Read the following instructions to run adiutor as you want:")
@@ -51,6 +50,7 @@ class Window(QWidget):
         item7 = QListWidgetItem("   " +str(i+3) + " " +" open instagram (For opening instagram)")
         item8 = QListWidgetItem("   " +str(i+4) + " " +" search .. on google (for searching anything on google)")
         item9 = QListWidgetItem("   " +str(i+5) + " " +" play ... on youtube (for playing music on youtube)")
+
 
         list_widget.addItem(item1)
         list_widget.addItem(item2)
@@ -63,10 +63,11 @@ class Window(QWidget):
         list_widget.addItem(item9)
 
         list_widget.setWordWrap(True)
+
         list_widget.setStyleSheet("color:'Green'; font-size: 16px; ")
 
-        #settings
         groupbox = QGroupBox("Customize Your Adiutor")
+
         vbox = QVBoxLayout()
         groupbox.setLayout(vbox)
         labelcmnd=QLabel("Command")
@@ -90,6 +91,7 @@ class Window(QWidget):
             "*:hover{background:'#BC006C';color:'White';}"
         )
         btn.clicked.connect(lambda: button_click(cmnd.text(),path.text()))
+
         vbox.addWidget(labelcmnd)
         vbox.addWidget(cmnd)
         vbox.addWidget(labelpath)
@@ -98,6 +100,7 @@ class Window(QWidget):
 
         #table
         self.createTable()
+
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.tableWidget)
         self.setLayout(self.layout)
@@ -108,11 +111,12 @@ class Window(QWidget):
         tabwidget.addTab(groupbox, "Settings")
         tabwidget.addTab(self.tableWidget, "List")
         grid.addWidget(tabwidget, 0, 0)
-
     def createTable(self):
         self.tableWidget = QTableWidget()
+
         # Row count
         self.tableWidget.setRowCount(4)
+
         # Column count
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setItem(0, 0, QTableWidgetItem("Command"))
@@ -120,6 +124,7 @@ class Window(QWidget):
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 def button_click(a,b):
+    # shost is a QString object
     cmndtxt = a
     pathtxt=b
     print(cmndtxt)
@@ -127,8 +132,8 @@ def button_click(a,b):
     if db.is_connected():
         print("connected")
         cur = db.cursor()
-        sql = "UPDATE Command SET command = %s, path=%s WHERE ip = %s"
-        val = (cmndtxt, pathtxt,IPAddr)
+        sql="INSERT INTO Commands (ip,command,path) VALUES(%s,%s,%s)"
+        val = (haship,cmndtxt, pathtxt)
         cur.execute(sql,val)
         db.commit()
 
@@ -157,4 +162,4 @@ def scndintrfc():
     window.setLayout(grid)
     window.show()
 
-scndintrfc()
+

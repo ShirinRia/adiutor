@@ -1,6 +1,10 @@
-import hashlib,os,socket,sys,mysql.connector
+import hashlib
+import os
+import socket,sys,mysql.connector
 from hashlib import md5, sha512
-from PyQt5.QtWidgets import *
+
+from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog, QGridLayout, \
+    QMainWindow, QHBoxLayout, QAction, QPlainTextEdit, QMenuBar, QTabWidget, QListWidgetItem, QListWidget
 from PyQt5.QtGui import QPixmap,QFont
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
@@ -17,16 +21,11 @@ hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 hash = hashlib.md5(IPAddr.encode())
 haship=hash.hexdigest()
-
+print(IPAddr)
+print(hash.hexdigest())
 widgets = {
     "logo": [],
-    "button": [],
-    "score": [],
-    "question": [],
-    "answer1": [],
-    "answer2": [],
-    "answer3": [],
-    "answer4": []
+    "button": []
 }
 app=QApplication(sys.argv)
 window=QWidget()
@@ -45,16 +44,16 @@ def clear_widgets():
     for widget in widgets:
         if widgets[widget] != []:
             widgets[widget][-1].hide()
-
+        # for i in range(0, len(widgets[widget])):
+        #     widgets[widget].pop()
 def start_gme():
     '''display frame 2'''
     clear_widgets()
     window.hide()
-
     if mydb.is_connected():
         print("connected")
         cur = mydb.cursor()
-        query = "select * from Command where ip=%s"
+        query = "select * from user_ip where ip=%s"
         ip = (haship,)
         cur.execute(query, ip)
         fetch = cur.fetchall()
@@ -63,15 +62,14 @@ def start_gme():
             import main
             main.scndintrfc()
         else:
-            insql = "INSERT INTO Command (ip,command,path) VALUES(%s,%s,%s)"
-            values = (haship, None, None)
+            insql = "INSERT INTO user_ip (id,ip) VALUES(%s,%s)"
+            values = (None,haship)
             cur.execute(insql, values)
             mydb.commit()
             import main
             main.scndintrfc()
         for s in fetch:
             print(s)
-
 
 def frame1():
     logo.setPixmap(image)
