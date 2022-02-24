@@ -5,8 +5,7 @@ import speech_recognition as sr
 from PyQt5.QtWidgets import QInputDialog, QWidget, QApplication
 from mailjet_rest import Client
 import os
-api_key = '1662f0c8b4c265e18ef7186bdb724ad6'
-api_secret = '46b648f8215a0fee6a8e6e4aa0dde148'
+
 mailjet = Client(auth=(api_key, api_secret), version='v3.1')
 
 
