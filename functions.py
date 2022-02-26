@@ -1,4 +1,4 @@
-import bs4,geocoder,psutil,pyautogui,mysql.connector,keyboard,pyttsx3,pywhatkit,requests,datetime,wikipedia,webbrowser,os,sys,wolframalpha,pyjokes,speedtest
+import geocoder,psutil,pyautogui,mysql.connector,pyttsx3,pywhatkit,requests,datetime,wikipedia,webbrowser,os,sys,wolframalpha,pyjokes,speedtest
 from time import sleep
 import speech_recognition as sr #pip install speechRecognition
 from pywikihow import search_wikihow
@@ -147,19 +147,19 @@ def start_game():
             prob=takeCommand().lower()
             while True:
                 if 'meaning' in prob:
-                    prob=prob.replace('what is the meaning of')
+                    prob=prob.replace('what is the meaning of',"")
                     prob=prob.replace(" ","")
                     result=dict.meaning(prob)
                     print('result')
                     speak(f"The meaning of {prob} is {result}")
                 elif 'synonym' in prob:
-                    prob = prob.replace('what is the synonym of')
+                    prob = prob.replace('what is the synonym of',"")
                     prob = prob.replace(" ", "")
                     result = dict.synonym(prob)
                     print('result')
                     speak(f"The maening of {prob} is {result}")
                 elif 'antonym' in prob:
-                    prob = prob.replace('what is the antonym of')
+                    prob = prob.replace('what is the antonym of',"")
                     prob = prob.replace(" ", "")
                     result = dict.antonym(prob)
                     print('result')
@@ -191,8 +191,8 @@ def start_game():
             webbrowser.open(web)
             speak("Launching")
         elif 'weather' in query:
-           import test
-           test.weather()
+           import weather
+           weather.weather()
         #search google
 
         #send whatsapp msg
