@@ -31,7 +31,8 @@ def takeCommand():
 def weather():
     speak("Enter the city: ")
     location = takeCommand().lower()
-    
+
+    complete_api_link = "https://api.openweathermap.org/data/2.5/weather?q=" + location + "&appid="
     api_link = requests.get(complete_api_link)
     api_data = api_link.json()
 

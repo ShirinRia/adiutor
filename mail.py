@@ -1,11 +1,9 @@
-import sys
-
-import pyttsx3
+import sys,pyttsx3
 import speech_recognition as sr
 from PyQt5.QtWidgets import QInputDialog, QWidget, QApplication
 from mailjet_rest import Client
-import os
-
+api_key = ''
+api_secret = ''
 mailjet = Client(auth=(api_key, api_secret), version='v3.1')
 
 

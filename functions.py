@@ -1,23 +1,31 @@
-import geocoder,psutil,pyautogui,webbrowser,os,sys,wolframalpha,pyjokes,speedtest,pywhatkit,requests,pyttsx3,datetime,wikipedia
+import bs4,geocoder,psutil,pyautogui,mysql.connector,keyboard,pyttsx3,pywhatkit,requests,datetime,wikipedia,webbrowser,os,sys,wolframalpha,pyjokes,speedtest
 from time import sleep
 import speech_recognition as sr #pip install speechRecognition
 from pywikihow import search_wikihow
+from PyDictionary import PyDictionary as dict
 
+mydb=mysql.connector.connect(
+    host=" sql6.freemysqlhosting.net",
+    user="sql6473246",
+    password="vrYZb6cDv9",
+    database="sql6473246"
+)
+if mydb.is_connected():
+    print("connected")
+    cur = mydb.cursor()
+    query = "select phone from Contacts where name=%s"
+    name=("farhana",)
+    cur.execute(query, name)
+    fetch = cur.fetchall()
+    for s in fetch:
+        print(s[0])
 engine = pyttsx3.init('sapi5')
 voices = engine.getProperty('voices')
+# print(voices[1].id)
 engine.setProperty('voice', voices[0].id)
 engine.setProperty('rate', 175)
-def news():
-    main_url='https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=d67833a8153940f3aee155b122f04984'
-    main_page=requests.get(main_url).json()
-    articles = main_page["articles"]
-    head=[]
-    day=["first","second","third","fourth","fifth","sixth","seventh","eighth","ninth","tenth"]
-    for ar in articles:
-        head.append(ar["title"])
-    for i in range (len(day)):
-        print(f"today's {day[i]} news is {head[i]}")
-        speak(f"today's top {day[i]} news is {head[i]}")
+chromedir="C:\\Program Files (x86)\\chromedriver.exe"
+
 
 def wishMe():
     hour = int(datetime.datetime.now().hour)
@@ -67,8 +75,13 @@ def takeCommand():
 
 
 def start_game():
+    print(s)
+    def music(c):
+        os.startfile("G:\music\\"+c+".mp3")
+
     while True:
         query = takeCommand().lower()
+
         if 'open notepad' in query:
              path="C:\\Windows\\System32\\notepad.exe"
              os.startfile(path)
@@ -78,12 +91,22 @@ def start_game():
         elif 'open command prompt' in query:
             os.system("start cmd")
 
-        elif 'play music on device' in query:
-            music_dir = 'G:\music'
-            songs = os.listdir(music_dir)
-            for song in songs:
-                if song.endswith('.mp3'):
-                    os.startfile(os.path.join(music_dir, song))
+        elif 'music on device' in query:
+            speak("do you have any choice?")
+            c=takeCommand().lower()
+            if 'no' in c:
+                music_dir = 'G:\music'
+                songs = os.listdir(music_dir)
+                #print(songs)
+                #rd=random.choice(songs)
+                for song in songs:
+                    if song.endswith('.mp3'):
+                        os.startfile(os.path.join(music_dir, song))
+
+            else:
+                c=c.replace("play",'')
+                c=c.replace(" ","")
+                music(c)
 
         elif 'time' in query:
             time = datetime.datetime.now().strftime('%I:%M %p')
@@ -94,17 +117,63 @@ def start_game():
             result=pyjokes.get_joke(language="en", category="all")
             print(result)
             speak(result)
+        elif 'google search' in query:
+            user = query.replace("google search", "")
+            # webbrowser.open("https://www.google.com/search?q=" + user)
+            pywhatkit.search(user)
+            speak(f"Searching {user} on google")
+        elif 'youtube search' in query:
+            user = query.replace("youtube search", "")
+            print(user)
+            webbrowser.open("https://www.youtube.com/results?search_query=" + user)
 
+            speak(f"Searching {user} on youtube")
         elif 'wikipedia' in query:
-            speak('Searching Wikipedia...')
-            query = query.replace("search", "")
-            query = query.replace("on wikipedia", "")
-            webbrowser.open("https://en.wikipedia.org/wiki/"+query)
-            results = wikipedia.summary(query, sentences=2)
-            speak("According to Wikipedia")
-            print(results)
-            speak(results)
-
+            try:
+                speak('Searching Wikipedia...')
+                query = query.replace("search", "")
+                query = query.replace("on wikipedia", "")
+                webbrowser.open("https://en.wikipedia.org/wiki/"+query)
+                results = wikipedia.summary(query, sentences=2)
+                speak(f"According to Wikipedia {results}")
+                print(results)
+            except Exception as e:
+                continue
+        #C:\\Users\\Hp\\Desktop\\Not use so much\\FastStone Capture
+        # elif result:
+        #     webbrowser.open("www.youtube.com")
+        elif 'activate dictionay' in query:
+            speak("Activated")
+            prob=takeCommand().lower()
+            while True:
+                if 'meaning' in prob:
+                    prob=prob.replace('what is the meaning of')
+                    prob=prob.replace(" ","")
+                    result=dict.meaning(prob)
+                    print('result')
+                    speak(f"The meaning of {prob} is {result}")
+                elif 'synonym' in prob:
+                    prob = prob.replace('what is the synonym of')
+                    prob = prob.replace(" ", "")
+                    result = dict.synonym(prob)
+                    print('result')
+                    speak(f"The maening of {prob} is {result}")
+                elif 'antonym' in prob:
+                    prob = prob.replace('what is the antonym of')
+                    prob = prob.replace(" ", "")
+                    result = dict.antonym(prob)
+                    print('result')
+                    speak(f"The antonym of {prob} is {result}")
+                elif "exit" in prob or "close" in prob:
+                    speak("dictionary is closed")
+                    break
+        elif 'activate chrome automation mode' in query:
+            speak("Chrome automation mode activated")
+            try:
+               from automation import googleauto
+               googleauto(query)
+            except Exception as e:
+                print("There is something error")
         elif 'open youtube' in query:
             webbrowser.open("https://www.youtube.com/")
 
@@ -114,18 +183,45 @@ def start_game():
             webbrowser.open("https://www.instagram.com/")
         elif 'open Facebook' in query:
             webbrowser.open("facebook.com")
+        elif 'website' in query:
+            query=query.replace("open","")
+            query=query.replace("website","")
+            query = query.replace(" ", "")
+            web='https://www.'+query+'.com'
+            webbrowser.open(web)
+            speak("Launching")
         elif 'weather' in query:
-           import weather
-           weather.weather()
+           import test
+           test.weather()
         #search google
-        elif 'google search' in query:
-            user = input("enter something to search")
-            webbrowser.open("https://www.google.com/search?q=" + user)
+
+        #send whatsapp msg
+        elif 'message' in query:
+            # speak("To whom")
+            # query = takeCommand().lower()
+            # riya="+8801992886660"
+            # # if 'riya' in query:
+            # speak("What should I say?")
+            # msg=takeCommand().lower()
+            # speak("Tell me the time")
+            # speak('In hour')
+            # hour=int(takeCommand())
+            # speak("in minutes")
+            # min=int(takeCommand())
+            pywhatkit.sendwhatmsg(s[0], "msg", 12, 5, 15, True, 120)
         #play youtubevideo
         elif 'on youtube' in query:
             song = query.replace('play', '')
             song = query.replace('on youtube', '')
             print(song)
+            speak("do you want to activate youtube automation mode?")
+            ch=takeCommand().lower()
+            if 'yes' in ch:
+                speak("Youtube automation mode activated")
+                from automation import youtubeauto
+                youtubeauto()
+            elif 'no' in ch:
+                speak("okay")
             speak('playing' + song)
             pywhatkit.playonyt(song)
 
@@ -141,9 +237,17 @@ def start_game():
             except Exception as e:
                 speak("Sorry, I am not able to send this email")
 
-        elif "news" in query:
+        elif "top news" in query:
             speak("Please wait.Fetching the latest news")
+            from news import news
             news()
+        elif "news" in query:
+            speak("which country")
+            query=takeCommand().lower()
+            speak("Please wait Fetching the latest news")
+            from news import corona
+            corona(query)
+
         elif "read book" in query:
             import audiobooks
             audiobooks.audiobk()
@@ -166,11 +270,14 @@ def start_game():
         elif "take screenshot" in query:
             speak("please tell me the name for this screenshot file")
             name=takeCommand().lower()
+            name=name+".png"
+            path='G:\\screeshot\\'+name
             speak("please hold the screen for few seconds, i am taking screenshot")
             sleep(3)
             img=pyautogui.screenshot()
-            img.save(f"{name}.png")
-            speak("screenshot is saved")
+            img.save(path)
+            speak("screenshot is saved here")
+            os.startfile('G:\\screeshot\\')
 
         elif "how to do" in query:
             speak("How to do mode is activated.")
@@ -251,7 +358,8 @@ def start_game():
         elif 'stop' in query:
             speak("Thanks for using me. Have a good day")
             sys.exit()
-
 def begindfg():
     wishMe()
     start_game()
+
+begindfg()
