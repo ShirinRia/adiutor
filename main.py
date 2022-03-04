@@ -1,20 +1,32 @@
-import hashlib
-import sys,mysql.connector,datetime,wikipedia,smtplib,cv2,random,pyttsx3,webbrowser,socket
+import hashlib,sys,mysql.connector,socket
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
+from PyQt5.QtCore import Qt, QRect
 
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 hash = hashlib.md5(IPAddr.encode())
 haship=hash.hexdigest()
+print(haship)
 db=mysql.connector.connect(
     host=" sql6.freemysqlhosting.net",
     user="sql6473246",
     password="vrYZb6cDv9",
     database="sql6473246"
 )
+
+if db.is_connected():
+    print("connected")
+    cur = db.cursor()
+    query = "select * from Command where ip=%s"
+    ip = (haship,)
+    cur.execute(query, ip)
+    fetch = cur.fetchall()
+    countrow = cur.rowcount
+
+
 
 app=QApplication(sys.argv)
 window=QWidget()
@@ -27,19 +39,18 @@ grid=QGridLayout()
 
 
 def start():
+    '''display frame 2'''
     import functions
-    functions.begindfg()
+    functions.start_game()
+
 
 class Window(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.setLayout(grid)
         label1 = QLabel("Widget in Tab 1.")
-        label3 = QLabel("Widget in Tab 3.")
-        label4 = QLabel("Widget in Tab 4.")
         label1.setStyleSheet("color:'Green';")
         list_widget = QListWidget()
-        list_widget2 = QListWidget()
         i=1
         item1 = QListWidgetItem("Hello dear, Welcome to Adiutor.")
         item2 = QListWidgetItem("Read the following instructions to run adiutor as you want:")
@@ -76,8 +87,16 @@ class Window(QWidget):
         path=QLineEdit(self)
         cmnd.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 20px; padding: 5px 0 5px;"  )
         labelpath.setStyleSheet("margin:0 0 0; ")
-        path.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 100px; padding: 5px 0 5px;")
+        path.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 80px; padding: 5px 0 5px;")
+
         print(cmnd.text())
+        comboBox = QComboBox()
+        comboBox.setGeometry(QRect(40, 40, 491, 31))
+        comboBox.setObjectName(("comboBox"))
+        comboBox.addItem("Application")
+        comboBox.addItem("Website")
+        comboBox.addItem("System")
+        comboBox.setStyleSheet("height:30px;margin:0 0 0px; padding-left:5px;border: 1px solid black; outline:none;")
         btn = QPushButton('Add Command')
         btn.setStyleSheet(
             "*{width: 100px;" +
@@ -86,17 +105,19 @@ class Window(QWidget):
             "border-radius: '15px';" +
             "font-size: 60 px;" +
             "color:'Black';" +
-            "margin:0px 150px 100px;"
+            "margin:30px 150px 0px;"
             "padding: 8px 15px}" +
             "*:hover{background:'#BC006C';color:'White';}"
         )
-        btn.clicked.connect(lambda: button_click(cmnd.text(),path.text()))
+        btn.clicked.connect(lambda: button_click(cmnd.text(),path.text(),comboBox.currentText()))
 
         vbox.addWidget(labelcmnd)
         vbox.addWidget(cmnd)
         vbox.addWidget(labelpath)
         vbox.addWidget(path)
+        vbox.addWidget(comboBox)
         vbox.addWidget(btn)
+
 
         #table
         self.createTable()
@@ -115,27 +136,35 @@ class Window(QWidget):
         self.tableWidget = QTableWidget()
 
         # Row count
-        self.tableWidget.setRowCount(4)
+        self.tableWidget.setRowCount(countrow+1)
 
         # Column count
         self.tableWidget.setColumnCount(2)
+
         self.tableWidget.setItem(0, 0, QTableWidgetItem("Command"))
         self.tableWidget.setItem(0, 1, QTableWidgetItem("Path/URL"))
+        for i in range(0, countrow):
+            for j in range(1, 3):
+               self.tableWidget.setItem(i+1, j-1, QTableWidgetItem(fetch[i][j]))
+
         self.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-def button_click(a,b):
-    # shost is a QString object
+def button_click(a,b,c):
     cmndtxt = a
     pathtxt=b
-    print(cmndtxt)
-    print (pathtxt)
+    content = c
     if db.is_connected():
         print("connected")
-        cur = db.cursor()
-        sql="INSERT INTO Commands (ip,command,path) VALUES(%s,%s,%s)"
-        val = (haship,cmndtxt, pathtxt)
-        cur.execute(sql,val)
-        db.commit()
+        try:
+            cur = db.cursor()
+            sql="INSERT INTO Command (ip,command,path,category) VALUES(%s,%s,%s,%s)"
+            val = (haship,cmndtxt, pathtxt,content)
+
+            cur.execute(sql,val)
+            db.commit()
+        except Exception as e:
+            print(e)
+
 
 # logo widget
 image = QPixmap("microphone.png")
@@ -157,9 +186,7 @@ button.clicked.connect(start)
 grid.addWidget(button, 4, 0, 1, 2)
 
 def scndintrfc():
-
     screen = Window()
     window.setLayout(grid)
     window.show()
-
-
+    sys.exit(app.exec())

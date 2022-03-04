@@ -1,15 +1,10 @@
-import hashlib
-import os
-import socket,sys,mysql.connector
-from hashlib import md5, sha512
-
-from PyQt5.QtWidgets import QApplication, QLabel, QPushButton, QVBoxLayout, QWidget, QFileDialog, QGridLayout, \
-    QMainWindow, QHBoxLayout, QAction, QPlainTextEdit, QMenuBar, QTabWidget, QListWidgetItem, QListWidget
+import hashlib,os,socket,sys,mysql.connector
+from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap,QFont
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt
-from PIL import Image
+
 mydb=mysql.connector.connect(
     host=" sql6.freemysqlhosting.net",
     user="sql6473246",
@@ -44,8 +39,6 @@ def clear_widgets():
     for widget in widgets:
         if widgets[widget] != []:
             widgets[widget][-1].hide()
-        # for i in range(0, len(widgets[widget])):
-        #     widgets[widget].pop()
 def start_gme():
     '''display frame 2'''
     clear_widgets()
@@ -68,8 +61,7 @@ def start_gme():
             mydb.commit()
             import main
             main.scndintrfc()
-        for s in fetch:
-            print(s)
+
 
 def frame1():
     logo.setPixmap(image)

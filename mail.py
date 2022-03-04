@@ -1,37 +1,39 @@
-import sys,pyttsx3
+import sys, pyttsx3
 import speech_recognition as sr
 from PyQt5.QtWidgets import QInputDialog, QWidget, QApplication
 from mailjet_rest import Client
+
 api_key = ''
 api_secret = ''
 mailjet = Client(auth=(api_key, api_secret), version='v3.1')
 
 
 def speak(audio):
-  engine = pyttsx3.init('sapi5')
-  voices = engine.getProperty('voices')
-  engine.setProperty('voice', voices[0].id)
-  engine.say(audio)
-  engine.runAndWait()
+    engine = pyttsx3.init('sapi5')
+    voices = engine.getProperty('voices')
+    engine.setProperty('voice', voices[0].id)
+    engine.say(audio)
+    engine.runAndWait()
+
 
 def takeCommand():
 
-  r = sr.Recognizer()
-  with sr.Microphone() as source:  # microphone k source hishebe use korbe,
-    print("Listening...")
-    r.pause_threshold = 1  # (amar kothar kono part jeno shuna bad na jay
-    audio = r.listen(source)
+    r = sr.Recognizer()
+    with sr.Microphone() as source:  # microphone k source hishebe use korbe,
+      print("Listening...")
+      r.pause_threshold = 1  # (amar kothar kono part jeno shuna bad na jay
+      audio = r.listen(source)
 
-  try:
-    print("Recognizing...")
-    query = r.recognize_google(audio, language='en-in')
-    print(f"User said: {query}\n")
+    try:
+      print("Recognizing...")
+      query = r.recognize_google(audio, language='en-in')
+      print(f"User said: {query}\n")
 
-  except Exception as e:
-    # print(e)
-    print("Say that again please...")
-    return "None"
-  return query
+    except Exception as e:
+      # print(e)
+      print("Say that again please...")
+      return "None"
+    return query
 
 
 class Example(QWidget):
