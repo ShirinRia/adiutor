@@ -1,6 +1,7 @@
 import hashlib,socket,geocoder,psutil,pyautogui,mysql.connector,pyttsx3,pywhatkit,requests,datetime,wikipedia,webbrowser,os,sys,wolframalpha,pyjokes,speedtest
 from time import sleep
 import speech_recognition as sr #pip install speechRecognition
+from plyer import notification
 from pywikihow import search_wikihow
 from PyDictionary import PyDictionary as dict
 from googletrans import Translator
@@ -112,16 +113,25 @@ def tran():
     text=result.text
     speak(text)
 
-def start_game():
+def start_game(time_1):
+
+    from time import time
+
     def music(c):
-        os.startfile("G:\music\\"+c+".mp3")
+        os.startfile("G:\music\\" + c + ".mp3")
 
     try:
         while True:
-
+            time_2 = time()
+            time_interval = time_2 - time_1
+            if time_interval > 1500:
+                notification.notify(
+                    title="Please take a break",
+                    message="It's good to take short break after 25 minutes of work (as per the Pomodoro Techniqe)",
+                    timeout=10
+                )
             query = takeCommand().lower()
             if query in keys_list:
-                print("hai")
                 path=commanddict[query][0]
                 medium=commanddict[query][1]
                 if 'System' in medium:
@@ -162,12 +172,11 @@ def start_game():
                 user = query.replace("google search", "")
 
                 speak(f"Searching {user} on google")
-                speak("This is what i found")
-                pywhatkit.search(user)
+
                 try:
 
-                    result=wikipedia.summary(user,3)
-                    speak(result)
+                    speak("This is what i found")
+                    pywhatkit.search(user)
                 except Exception as e:
                     speak("I did not find any suitable data")
                     continue
@@ -178,37 +187,48 @@ def start_game():
 
                 speak(f"Searching {user} on youtube")
             elif 'wikipedia' in query:
+                speak('What should i search?')
+                query = takeCommand().lower()
                 try:
-                    speak('Searching Wikipedia...')
-                    query = query.replace("search", "")
-                    query = query.replace("on wikipedia", "")
-                    webbrowser.open("https://en.wikipedia.org/wiki/"+query)
-                    results = wikipedia.summary(query, sentences=2)
-                    speak(f"According to Wikipedia {results}")
-                    print(results)
+                    if 'none' in query:
+                        speak('Say again')
+                        query = takeCommand().lower()
+                        speak('Searching Wikipedia...')
+                        webbrowser.open("https://en.wikipedia.org/wiki/" + query)
+                        results = wikipedia.summary(query, sentences=2)
+                        speak(f"According to Wikipedia {results}")
+                        print(results)
+                    else:
+                        speak('Searching Wikipedia...')
+
+                        webbrowser.open("https://en.wikipedia.org/wiki/"+query)
+                        results = wikipedia.summary(query, sentences=2)
+                        speak(f"According to Wikipedia {results}")
+                        print(results)
                 except Exception as e:
                     continue
-            elif 'activate dictionay' in query:
+            elif 'activate dictionary' in query:
                 speak("Activated")
-                prob=takeCommand().lower()
                 while True:
+                    prob=takeCommand().lower()
+
                     if 'meaning' in prob:
                         prob=prob.replace('what is the meaning of',"")
                         prob=prob.replace(" ","")
                         result=dict.meaning(prob)
-                        print('result')
+                        print(result)
                         speak(f"The meaning of {prob} is {result}")
                     elif 'synonym' in prob:
                         prob = prob.replace('what is the synonym of',"")
                         prob = prob.replace(" ", "")
                         result = dict.synonym(prob)
-                        print('result')
-                        speak(f"The maening of {prob} is {result}")
+                        print(result)
+                        speak(f"The synonym of {prob} is {result}")
                     elif 'antonym' in prob:
                         prob = prob.replace('what is the antonym of',"")
                         prob = prob.replace(" ", "")
                         result = dict.antonym(prob)
-                        print('result')
+                        print(result)
                         speak(f"The antonym of {prob} is {result}")
                     elif "exit" in prob or "close" in prob:
                         speak("dictionary is closed")
@@ -228,14 +248,8 @@ def start_game():
             elif 'open insta' in query:
                 webbrowser.open("https://www.instagram.com/")
             elif 'open Facebook' in query:
-                webbrowser.open("facebook.com")
-            elif 'website' in query:
-                query=query.replace("open","")
-                query=query.replace("website","")
-                query = query.replace(" ", "")
-                web='https://www.'+query+'.com'
-                webbrowser.open(web)
-                speak("Launching")
+                webbrowser.open("https://www.facebook.com/")
+
             elif 'weather' in query:
                import weather
                weather.weather()
@@ -257,7 +271,7 @@ def start_game():
             #play youtubevideo
             elif 'on youtube' in query:
                 song = query.replace('play', '')
-                song = query.replace('on youtube', '')
+                song = song.replace('on youtube', '')
                 print(song)
                 speak("do you want to activate youtube automation mode?")
                 ch=takeCommand().lower()
@@ -270,26 +284,27 @@ def start_game():
                 speak('playing' + song)
                 pywhatkit.playonyt(song)
 
-            elif "internet speed" in query:
+            elif "internet speed" in query or "net speed" in query:
+                speak("please wait for some time. I am checking the your internet speed")
                 st=speedtest.Speedtest()
                 dl=round((st.download()/1000000),2)
                 up=round((st.upload()/1000000),2)
                 speak(f"you have {dl} mbps downloading speed and {up} mbps uploading speed")
             elif 'email' in query:
                 try:
-                    import mail
-                    mail.est()
+                    import mailinterface
+                    mailinterface.est()
                 except Exception as e:
                     speak("Sorry, I am not able to send this email")
 
             elif "top news" in query:
-                speak("Please wait.Fetching the latest news")
+                speak("Please wait, Fetching the latest news")
                 from news import news
                 news()
-            elif "news" in query:
+            elif "corona news" in query:
                 speak("which country")
                 query=takeCommand().lower()
-                speak("Please wait Fetching the latest news")
+                speak("Please wait, Fetching the latest news")
                 from news import corona
                 corona(query)
 
@@ -351,23 +366,27 @@ def start_game():
                         speak("Sorry, i am not able to find this")
             elif 'i have some question' in query:
                 speak("ask me anything")
-                query = takeCommand().lower()
-                try:
-                    client = wolframalpha.Client("")
-                    res = client.query(query)
-                    ans = next(res.results).text
-                    speak(ans)
-                    # Logic for executing tasks based on query
-                except Exception:
+                while True:
+                    query = takeCommand().lower()
+                    if 'leave' in query or 'close' in query or 'exit' in query or 'nothing' in query:
+                        speak("ask me anything  mode is closed")
+                        break
                     try:
-                        results = wikipedia.summary(query, sentences=2)
-                        speak(results)
-
+                        client = wolframalpha.Client("RUEEV7-36762W69XT")
+                        res = client.query(query)
+                        ans = next(res.results).text
+                        speak(ans)
+                        # Logic for executing tasks based on query
                     except Exception:
                         try:
-                            webbrowser.open("https://www.google.com/search?q=" + query)
+                            results = wikipedia.summary(query, sentences=2)
+                            speak(results)
+
                         except Exception:
-                            speak("It is weird but I got nothing")
+                            try:
+                                webbrowser.open("https://www.google.com/search?q=" + query)
+                            except Exception:
+                                speak("It is weird but I got nothing")
 
             elif 'check battery' in query:
                 battery=psutil.sensors_battery()
@@ -416,6 +435,8 @@ def start_game():
     except Exception as e:
         sys.exit()
 def begindfg():
+    from time import time
+    time_1 = time()
     wishMe()
-    start_game()
+    start_game(time_1)
 begindfg()
