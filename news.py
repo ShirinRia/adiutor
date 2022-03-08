@@ -1,6 +1,4 @@
-import bs4
-import pyttsx3
-import requests
+import bs4,pyttsx3,requests
 
 
 def news():

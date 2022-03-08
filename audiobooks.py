@@ -1,30 +1,26 @@
-import sys,cv2,pyttsx3
 import PyPDF2 as pdf
 import pyttsx3 #pip install pyttsx3
-import pywhatkit
-import requests
-import speech_recognition as sr #pip install speechRecognition
-import datetime,wikipedia #pip install wikipedia
-import webbrowser,os,sys,wolframalpha,pyjokes,keyboard
 
 def printi():
     # print("boo")
     from voice import dfg
     dfg()
-def audiobk():
+def audiobk(bk,spage):
     global engine
     engine = pyttsx3.init()
     try:
-        getbk=input("path: ")
+        # getbk=input("path: ")
+        getbk=bk
         book=open(getbk,"rb")
         pdfreader=pdf.PdfFileReader(book)
         pages=pdfreader.numPages
         print(pages)
 
 
-        engine.say("From which page should I start reading?")
-        engine.runAndWait()
-        start_page=int(input("enter:  "))
+        # engine.say("From which page should I start reading?")
+        # engine.runAndWait()
+        # start_page=int(input("enter:  "))
+        start_page=int(spage)
         for i in range(start_page,pages+1):
 
             pageget=pdfreader.getPage(i)
@@ -36,4 +32,4 @@ def audiobk():
         # print("hi")
         engine.stop()
         printi()
-audiobk()
+# audiobk()

@@ -41,7 +41,7 @@ grid=QGridLayout()
 def start():
     '''display frame 2'''
     import functions
-    functions.start_game()
+    functions.begindfg()
 
 
 class Window(QWidget):
@@ -189,4 +189,3 @@ def scndintrfc():
     screen = Window()
     window.setLayout(grid)
     window.show()
-    sys.exit(app.exec())
