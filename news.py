@@ -2,7 +2,7 @@ import bs4,pyttsx3,requests
 
 
 def news():
-    main_url='https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey='
+    main_url='https://newsapi.org/v2/top-headlines?sources=techcrunch&apiKey=d67833a8153940f3aee155b122f04984'
     main_page=requests.get(main_url).json()
     articles = main_page["articles"]
     head=[]

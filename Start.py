@@ -1,10 +1,11 @@
-import hashlib,os,socket,sys,mysql.connector
+import hashlib,socket,sys,mysql.connector
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap,QFont
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt
-
+from PIL import Image
 mydb=mysql.connector.connect(
     host=" sql6.freemysqlhosting.net",
     user="sql6473246",
@@ -16,11 +17,11 @@ hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 hash = hashlib.md5(IPAddr.encode())
 haship=hash.hexdigest()
-print(IPAddr)
-print(hash.hexdigest())
+
 widgets = {
     "logo": [],
-    "button": []
+    "button": [],
+
 }
 app=QApplication(sys.argv)
 window=QWidget()
@@ -39,18 +40,19 @@ def clear_widgets():
     for widget in widgets:
         if widgets[widget] != []:
             widgets[widget][-1].hide()
+        for i in range(0, len(widgets[widget])):
+            widgets[widget].pop()
 def start_gme():
     '''display frame 2'''
     clear_widgets()
     window.hide()
+
     if mydb.is_connected():
-        print("connected")
         cur = mydb.cursor()
         query = "select * from user_ip where ip=%s"
         ip = (haship,)
         cur.execute(query, ip)
         fetch = cur.fetchall()
-        print(cur.rowcount)
         if cur.rowcount>0:
             import main
             main.scndintrfc()

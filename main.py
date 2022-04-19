@@ -1,15 +1,17 @@
 import hashlib,sys,mysql.connector,socket
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QPixmap, QFont, QIcon
 from PyQt5 import QtGui, QtCore
 from PyQt5.QtGui import QCursor
 from PyQt5.QtCore import Qt, QRect
 
+
 hostname = socket.gethostname()
 IPAddr = socket.gethostbyname(hostname)
 hash = hashlib.md5(IPAddr.encode())
 haship=hash.hexdigest()
-print(haship)
+
 db=mysql.connector.connect(
     host=" sql6.freemysqlhosting.net",
     user="sql6473246",
@@ -22,10 +24,15 @@ if db.is_connected():
     cur = db.cursor()
     query = "select * from Command where ip=%s"
     ip = (haship,)
+    # cur.execute(query)
     cur.execute(query, ip)
     fetch = cur.fetchall()
+    # for s in fetch:
+    #     print(s[1])
     countrow = cur.rowcount
-
+    for i in range (0,countrow):
+        for j in range(1, 3):
+            print(fetch[i][j])
 
 
 app=QApplication(sys.argv)
@@ -37,18 +44,22 @@ window.move(440,80)#(x,y)
 window.setStyleSheet("background:'White'")
 grid=QGridLayout()
 
-
 def start():
-    '''display frame 2'''
+
     import functions
     functions.begindfg()
-
 
 class Window(QWidget):
     def __init__(self):
         QWidget.__init__(self)
         self.setLayout(grid)
-        label1 = QLabel("Widget in Tab 1.")
+        label1 = QLabel("Adiutor is a virtual assistant that is part of Windows.\n Adiutor lets you stay connected without lifting a finger.")
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.italic()
+        font.setPixelSize(16)
+        font.setWeight(75)
+        label1.setFont(font)
         label1.setStyleSheet("color:'Green';")
         list_widget = QListWidget()
         i=1
@@ -78,18 +89,17 @@ class Window(QWidget):
         list_widget.setStyleSheet("color:'Green'; font-size: 16px; ")
 
         groupbox = QGroupBox("Customize Your Adiutor")
-
         vbox = QVBoxLayout()
         groupbox.setLayout(vbox)
         labelcmnd=QLabel("Command")
         labelpath=QLabel("Path/URL")
         cmnd = QLineEdit(self)
+       # cmnd.move(800, 20)
         path=QLineEdit(self)
         cmnd.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 20px; padding: 5px 0 5px;"  )
         labelpath.setStyleSheet("margin:0 0 0; ")
         path.setStyleSheet("border:1px solid '#BC006C'; margin:0 50px 80px; padding: 5px 0 5px;")
 
-        print(cmnd.text())
         comboBox = QComboBox()
         comboBox.setGeometry(QRect(40, 40, 491, 31))
         comboBox.setObjectName(("comboBox"))
@@ -118,10 +128,8 @@ class Window(QWidget):
         vbox.addWidget(comboBox)
         vbox.addWidget(btn)
 
-
         #table
         self.createTable()
-
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.tableWidget)
         self.setLayout(self.layout)
@@ -131,7 +139,9 @@ class Window(QWidget):
         tabwidget.addTab(list_widget, "Help")
         tabwidget.addTab(groupbox, "Settings")
         tabwidget.addTab(self.tableWidget, "List")
+
         grid.addWidget(tabwidget, 0, 0)
+
     def createTable(self):
         self.tableWidget = QTableWidget()
 
@@ -153,13 +163,13 @@ def button_click(a,b,c):
     cmndtxt = a
     pathtxt=b
     content = c
+
     if db.is_connected():
         print("connected")
         try:
             cur = db.cursor()
             sql="INSERT INTO Command (ip,command,path,category) VALUES(%s,%s,%s,%s)"
             val = (haship,cmndtxt, pathtxt,content)
-
             cur.execute(sql,val)
             db.commit()
         except Exception as e:
@@ -169,6 +179,7 @@ def button_click(a,b,c):
 # logo widget
 image = QPixmap("microphone.png")
 button = QPushButton()
+
 button.setIcon(QIcon(image))
 button.setIconSize(QtCore.QSize(100,100))
 button.setCursor(QCursor(QtCore.Qt.PointingHandCursor))
@@ -186,6 +197,7 @@ button.clicked.connect(start)
 grid.addWidget(button, 4, 0, 1, 2)
 
 def scndintrfc():
+
     screen = Window()
     window.setLayout(grid)
     window.show()
